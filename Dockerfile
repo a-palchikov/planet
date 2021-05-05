@@ -166,6 +166,8 @@ ARG PLANET_GID
 
 ENV DEBIAN_FRONTEND noninteractive
 
+COPY --from=iptables-builder /usr/local/ /usr/local/
+
 # FIXME: allowing downgrades and pinning the version of libip4tc0 for iptables
 # as the package has a dependency on the older version as the one available.
 RUN --mount=type=cache,target=/var/cache/apt,rw --mount=type=cache,target=/var/lib/apt,rw \
@@ -214,7 +216,9 @@ RUN --mount=type=cache,target=/var/cache/apt,rw --mount=type=cache,target=/var/l
 	strace \
 	netbase \
 	file \
-	bsdmainutils;
+	bsdmainutils; \
+	# update loader's cache after pulling in iptables build
+	ldconfig
 
 RUN set -ex && \
 	groupadd --system --non-unique --gid ${PLANET_GID} planet && \
@@ -222,7 +226,6 @@ RUN set -ex && \
 	groupadd --system docker && \
 	usermod -a -G planet root && \
 	usermod -a -G docker planet;
-COPY --from=iptables-builder /usr/local/ /usr/local/
 
 FROM gobase AS flannel-builder
 ARG FLANNEL_VER
