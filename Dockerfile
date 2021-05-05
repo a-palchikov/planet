@@ -50,7 +50,7 @@ RUN apk add --no-cache curl tar && mkdir -p /tmp
 
 FROM ${DEBIAN_IMAGE} AS iptables-builder
 ARG IPTABLES_VER
-RUN --mount=type=cache,target=/var/cache/apt,rw --mount=type=cache,target=/var/lib/apt,rw \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt --mount=type=cache,sharing=locked,target=/var/lib/apt \
 	set -ex && \
 	apt-get update && apt-get install -y --no-install-recommends \
 		git pkg-config autoconf automake libtool libmnl-dev make build-essential
@@ -107,7 +107,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 COPY ./build.assets/docker/os-rootfs/ /
 
-RUN --mount=type=cache,target=/var/cache/apt,rw --mount=type=cache,target=/var/lib/apt,rw \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt --mount=type=cache,sharing=locked,target=/var/lib/apt \
 	set -ex; \
 	if ! command -v gpg > /dev/null; then \
 		apt-get update; \
