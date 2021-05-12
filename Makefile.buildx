@@ -1,6 +1,6 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR := $(realpath $(patsubst %/,%,$(dir $(MKFILE_PATH))))
-CONTAINER_BUILDDIR := _build
+CONTAINER_BUILDDIR ?= _build
 BUILDDIR ?= $(CURRENT_DIR)/$(CONTAINER_BUILDDIR)
 DOCKER ?= docker
 
