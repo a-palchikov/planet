@@ -21,8 +21,7 @@ ARG GO_BUILDER_VERSION=go1.13.8-stretch
 # TODO(dima): update to 2.7.2 release once available
 # ARG DISTRIBUTION_VER=release/2.7
 ARG DISTRIBUTION_VER=v2.7.1-gravitational
-# directory with build artefacts
-ARG BUILD_DIR=_build
+ARG ARTEFACTS_DIR=_build
 
 ARG PLANET_PKG_PATH=/gopath/src/github.com/gravitational/planet
 ARG PLANET_BUILDFLAGS="-tags 'selinux sqlite_omit_load_extension'"
@@ -328,7 +327,7 @@ RUN set -ex && \
 
 FROM base AS rootfs
 ARG ETCD_LATEST_VER
-ARG BUILD_DIR
+ARG ARTEFACTS_DIR
 
 # systemd.mk
 RUN set -ex && \
@@ -340,8 +339,8 @@ COPY ./build.assets/makefiles/base/systemd/journald.conf /lib/systemd/system/sys
 COPY ./build.assets/makefiles/base/systemd/system.conf /etc/systemd/system.conf.d/
 
 # containers.mk
-COPY ${BUILD_DIR}/nettest.tar.gz /etc/docker/offline/
-COPY ${BUILD_DIR}/pause.tar.gz /etc/docker/offline/
+COPY ${ARTEFACTS_DIR}/nettest.tar.gz /etc/docker/offline/
+COPY ${ARTEFACTS_DIR}/pause.tar.gz /etc/docker/offline/
 COPY ./build.assets/makefiles/master/k8s-master/offline-container-import.service /lib/systemd/system/
 RUN set -ex && \
 	ln -sf /lib/systemd/system/offline-container-import.service /lib/systemd/system/multi-user.target.wants/

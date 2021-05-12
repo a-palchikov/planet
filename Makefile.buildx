@@ -1,17 +1,18 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR := $(realpath $(patsubst %/,%,$(dir $(MKFILE_PATH))))
-CONTAINER_BUILDDIR ?= _build
-BUILDDIR ?= $(CURRENT_DIR)/$(CONTAINER_BUILDDIR)
+ARTEFACTS_DIR := _build
+BUILDDIR ?= $(CURRENT_DIR)/$(ARTEFACTS_DIR)
+OUTPUTDIR ?= $(BUILDDIR)
 DOCKER ?= docker
 
 .PHONY: all binaries tarball rootfs-shell clean
 all: tarball
 
-binaries: | $(BUILDDIR)
-	TARGET=binary-releaser OUTPUTDIR=$(BUILDDIR) hack/build
+binaries: | $(BUILDDIR) $(OUTPUTDIR)
+	TARGET=binary-releaser OUTPUTDIR=$(OUTPUTDIR) hack/build
 
-tarball: $(BUILDDIR)/pause.tar.gz $(BUILDDIR)/nettest.tar.gz | $(BUILDDIR)
-	TARGET=releaser OUTPUTDIR=$(BUILDDIR) CONTAINER_BUILDDIR=$(CONTAINER_BUILDDIR) hack/build
+tarball: $(BUILDDIR)/pause.tar.gz $(BUILDDIR)/nettest.tar.gz | $(BUILDDIR) $(OUTPUTDIR)
+	TARGET=releaser OUTPUTDIR=$(OUTPUTDIR) ARTEFACTS_DIR=$(ARTEFACTS_DIR) hack/build
 
 rootfs-shell:
 	TARGET=rootfs OUTPUT_FORMAT="type=image,name=planet-rootfs:v1" hack/build
@@ -28,6 +29,9 @@ $(BUILDDIR)/nettest.tar.gz: | $(BUILDDIR)
 	$(DOCKER) save -o $@ $(image)
 
 $(BUILDDIR):
+	mkdir -p $@
+
+$(OUTPUTDIR):
 	mkdir -p $@
 
 clean:
