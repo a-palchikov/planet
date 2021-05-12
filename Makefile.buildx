@@ -1,35 +1,35 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR := $(realpath $(patsubst %/,%,$(dir $(MKFILE_PATH))))
-CONTAINER_BUILD_DIR := _build
-BUILD_DIR ?= $(CURRENT_DIR)/$(CONTAINER_BUILD_DIR)
+CONTAINER_BUILDDIR := _build
+BUILDDIR ?= $(CURRENT_DIR)/$(CONTAINER_BUILDDIR)
 DOCKER ?= docker
 
 .PHONY: all binaries tarball rootfs-shell clean
 all: tarball
 
-binaries: | $(BUILD_DIR)
-	TARGET=binary-releaser OUTPUT_DIR=$(BUILD_DIR) hack/build
+binaries: | $(BUILDDIR)
+	TARGET=binary-releaser OUTPUTDIR=$(BUILDDIR) hack/build
 
-tarball: $(BUILD_DIR)/pause.tar.gz $(BUILD_DIR)/nettest.tar.gz | $(BUILD_DIR)
-	TARGET=releaser OUTPUT_DIR=$(BUILD_DIR) CONTAINER_BUILD_DIR=$(CONTAINER_BUILD_DIR) hack/build
+tarball: $(BUILDDIR)/pause.tar.gz $(BUILDDIR)/nettest.tar.gz | $(BUILDDIR)
+	TARGET=releaser OUTPUTDIR=$(BUILDDIR) CONTAINER_BUILDDIR=$(CONTAINER_BUILDDIR) hack/build
 
 rootfs-shell:
 	TARGET=rootfs OUTPUT_FORMAT="type=image,name=planet-rootfs:v1" hack/build
 	$(DOCKER) run --rm -ti planet-rootfs:v1 bash
 
-$(BUILD_DIR)/pause.tar.gz: image=gcr.io/google_containers/pause:3.2
-$(BUILD_DIR)/pause.tar.gz: | $(BUILD_DIR)
+$(BUILDDIR)/pause.tar.gz: image=gcr.io/google_containers/pause:3.2
+$(BUILDDIR)/pause.tar.gz: | $(BUILDDIR)
 	$(DOCKER) pull $(image)
 	$(DOCKER) save -o $@ $(image)
 
-$(BUILD_DIR)/nettest.tar.gz: image=gcr.io/google_containers/nettest:1.8
-$(BUILD_DIR)/nettest.tar.gz: | $(BUILD_DIR)
+$(BUILDDIR)/nettest.tar.gz: image=gcr.io/google_containers/nettest:1.8
+$(BUILDDIR)/nettest.tar.gz: | $(BUILDDIR)
 	$(DOCKER) pull $(image)
 	$(DOCKER) save -o $@ $(image)
 
-$(BUILD_DIR):
+$(BUILDDIR):
 	mkdir -p $@
 
 clean:
-	rm -r $(BUILD_DIR) || true
+	rm -r $(BUILDDIR) || true
 	$(DOCKER) rmi --force planet-rootfs:v1

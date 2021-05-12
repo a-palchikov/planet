@@ -4,9 +4,9 @@
 set -eu
 
 : ${TARGET=releaser}
-: ${OUTPUT_DIR=./_build}
-: ${CONTAINER_BUILD_DIR=./_build}
-: ${OUTPUT_FORMAT="type=local,dest=$OUTPUT_DIR"}
+: ${OUTPUTDIR=./_build}
+: ${CONTAINER_BUILDDIR=./_build}
+: ${OUTPUT_FORMAT="type=local,dest=$OUTPUTDIR"}
 
 if [ -n "$BUILDKIT_HOST" ] && buildctl --version >/dev/null 2>&1; then
   targetFlags=""
@@ -16,7 +16,7 @@ if [ -n "$BUILDKIT_HOST" ] && buildctl --version >/dev/null 2>&1; then
   buildctlCmd build \
       $targetFlags \
       --frontend=dockerfile.v0 \
-      --build-arg=BUILD_DIR=$CONTAINER_BUILD_DIR \
+      --build-arg=BUILD_DIR=$CONTAINER_BUILDDIR \
       --local context=. \
       --local dockerfile=. \
       --output="$OUTPUT_FORMAT"
@@ -28,6 +28,6 @@ else
   buildxCmd build \
     $targetFlags \
       --output="$OUTPUT_FORMAT" \
-      --build-arg=BUILD_DIR=$CONTAINER_BUILD_DIR \
+      --build-arg=BUILD_DIR=$CONTAINER_BUILDDIR \
       .
 fi
