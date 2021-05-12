@@ -1,8 +1,7 @@
 build/
-_build/
+_build/planet*
 vagrant/
 .drone.yml
-.git/
 .github/
 
 # darwin-specific

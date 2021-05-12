@@ -25,6 +25,7 @@ _testmain.go
 *.prof
 
 build
+_build/
 .vagrant
 
 # Ev-specific, for cross-machine debugging (will remove later)
@@ -35,6 +36,3 @@ make.sh
 
 *.swp
 .vscode
-
-build.assets/docker/frozen-images/
-_build/

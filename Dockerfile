@@ -21,6 +21,8 @@ ARG GO_BUILDER_VERSION=go1.13.8-stretch
 # TODO(dima): update to 2.7.2 release once available
 # ARG DISTRIBUTION_VER=release/2.7
 ARG DISTRIBUTION_VER=v2.7.1-gravitational
+# directory with build artefacts
+ARG BUILD_DIR=_build
 
 ARG PLANET_PKG_PATH=/gopath/src/github.com/gravitational/planet
 ARG PLANET_BUILDFLAGS="-tags 'selinux sqlite_omit_load_extension'"
@@ -113,9 +115,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt --mount=type=cache,s
 		apt-get update; \
 		apt-get install -y --no-install-recommends \
 		gnupg2 \
-		dirmngr \
-		; \
-		rm -rf /var/lib/apt/lists/*; \
+		dirmngr; \
 	fi
 
 RUN --mount=type=cache,target=/var/cache/apt,rw --mount=type=cache,target=/var/lib/apt,rw \
@@ -328,6 +328,7 @@ RUN set -ex && \
 
 FROM base AS rootfs
 ARG ETCD_LATEST_VER
+ARG BUILD_DIR
 
 # systemd.mk
 RUN set -ex && \
@@ -339,7 +340,8 @@ COPY ./build.assets/makefiles/base/systemd/journald.conf /lib/systemd/system/sys
 COPY ./build.assets/makefiles/base/systemd/system.conf /etc/systemd/system.conf.d/
 
 # containers.mk
-COPY ./build.assets/docker/frozen-images/*.tar.gz /etc/docker/offline/
+COPY ${BUILD_DIR}/nettest.tar.gz /etc/docker/offline/
+COPY ${BUILD_DIR}/pause.tar.gz /etc/docker/offline/
 COPY ./build.assets/makefiles/master/k8s-master/offline-container-import.service /lib/systemd/system/
 RUN set -ex && \
 	ln -sf /lib/systemd/system/offline-container-import.service /lib/systemd/system/multi-user.target.wants/
